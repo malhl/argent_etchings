@@ -9,6 +9,7 @@
 
 var textToPhyrexian = window.textToPhyrexian;
 var wordToPhyrexian = window.wordToPhyrexian;
+var ipaToPhyrexian = window.ipaToPhyrexian;
 var DICTIONARY = window.DICTIONARY;
 
 var passed = 0;
@@ -385,15 +386,116 @@ var testGroups = [
     ]
   },
 
+  // ---------------------------------------------------------
+  // 5. IPA to Phyrexian Font Mapping
+  // ---------------------------------------------------------
+  {
+    name: "IPA Mapping: Consonants — Nasals & Plosives",
+    source: "MTG Wiki — Phonology Table",
+    type: "ipa",
+    tests: [
+      { input: "m",  expected: "m",  note: "bilabial nasal" },
+      { input: "n",  expected: "n",  note: "alveolar nasal" },
+      { input: "ŋ",  expected: "N",  note: "velar nasal (sing)" },
+      { input: "ɴ",  expected: "$",  note: "uvular nasal" },
+      { input: "p",  expected: "p",  note: "voiceless bilabial plosive" },
+      { input: "b",  expected: "b",  note: "voiced bilabial plosive" },
+      { input: "t",  expected: "t",  note: "voiceless alveolar plosive" },
+      { input: "d",  expected: "d",  note: "voiced alveolar plosive" },
+      { input: "ɢ",  expected: "G",  note: "voiced uvular plosive" },
+      { input: "ʔ",  expected: "D",  note: "glottal stop" },
+    ]
+  },
+
+  {
+    name: "IPA Mapping: Consonants — Sliced (Aspirated)",
+    source: "MTG Wiki — Phonology Table",
+    type: "ipa",
+    tests: [
+      { input: "pʰ", expected: "f",  note: "aspirated p (sliced)" },
+      { input: "tʰ", expected: "H",  note: "aspirated t (sliced)" },
+      { input: "kʰ", expected: "%",  note: "aspirated k (sliced)" },
+      { input: "qʰ", expected: "_",  note: "aspirated q (sliced)" },
+    ]
+  },
+
+  {
+    name: "IPA Mapping: Consonants — Clanked (Ejective)",
+    source: "MTG Wiki — Phonology Table",
+    type: "ipa",
+    tests: [
+      { input: "pʼ",  expected: "P",  note: "ejective p (clanked)" },
+      { input: "tʼ",  expected: "T",  note: "ejective t (clanked)" },
+      { input: "kxʼ", expected: "B",  note: "ejective k (clanked)" },
+      { input: "qʼ",  expected: "I",  note: "ejective q (clanked)" },
+    ]
+  },
+
+  {
+    name: "IPA Mapping: Consonants — Fricatives",
+    source: "MTG Wiki — Phonology Table",
+    type: "ipa",
+    tests: [
+      { input: "θ",  expected: "Z",  note: "voiceless dental (thin)" },
+      { input: "ð",  expected: "K",  note: "voiced dental (this)" },
+      { input: "ɣ",  expected: "z",  note: "voiced velar fricative" },
+      { input: "χ",  expected: "S",  note: "voiceless uvular fricative" },
+      { input: "ʁ",  expected: "M",  note: "voiced uvular fricative" },
+      { input: "ʃ",  expected: "g",  note: "postalveolar (shoe)" },
+      { input: "ʒ",  expected: "J",  note: "postalveolar (vision)" },
+      { input: "ɬ",  expected: "V",  note: "voiceless lateral fricative" },
+      { input: "ɮ",  expected: "R",  note: "voiced lateral fricative" },
+    ]
+  },
+
+  {
+    name: "IPA Mapping: Consonants — Affricates & Approximants",
+    source: "MTG Wiki — Phonology Table",
+    type: "ipa",
+    tests: [
+      { input: "tʃ", expected: "A",  note: "voiceless postalveolar affricate (ch)" },
+      { input: "dʒ", expected: "a",  note: "voiced postalveolar affricate (j)" },
+      { input: "ʋ",  expected: "v",  note: "labiodental approximant" },
+      { input: "ɰ",  expected: "W",  note: "velar approximant" },
+    ]
+  },
+
+  {
+    name: "IPA Mapping: Vowels",
+    source: "MTG Wiki — Phonology Table",
+    type: "ipa",
+    tests: [
+      { input: "ɪ",  expected: "E",  note: "near-close near-front (kit)" },
+      { input: "ə",  expected: "F",  note: "schwa (above)" },
+      { input: "ø",  expected: "O",  note: "close-mid rounded (Sheoldred)" },
+      { input: "ɒ",  expected: "U",  note: "open back rounded (thought)" },
+    ]
+  },
+
+  {
+    name: "IPA Mapping: Multi-character Sequences",
+    source: "MTG Wiki — Phonology Table",
+    type: "ipa",
+    tests: [
+      { input: "pʰɒt",   expected: "fUt",   note: "sliced p + vowel + t" },
+      { input: "tʃɪŋ",   expected: "AEN",   note: "affricate + vowel + nasal" },
+      { input: "dʒəɣ",   expected: "aFz",   note: "affricate + schwa + fricative" },
+      { input: "ʔɪɬ",    expected: "DEV",   note: "glottal stop + vowel + lateral" },
+    ]
+  },
+
 ];
 
 // =========================================================
 // Test runner
 // =========================================================
 
-function runTest(test) {
+function runTest(test, groupType) {
   var result;
-  if (test.input.indexOf(' ') === -1 && !test.note) {
+  if (groupType === 'ipa') {
+    // IPA mapping test — test ipaToPhyrexian directly
+    result = ipaToPhyrexian(test.input);
+  } else if (test.input.indexOf(' ') === -1 && !test.note) {
     // Single word — test wordToPhyrexian directly
     result = wordToPhyrexian(test.input);
   } else {
@@ -425,7 +527,7 @@ function renderResults() {
     var groupFailed = 0;
 
     for (var t = 0; t < group.tests.length; t++) {
-      var r = runTest(group.tests[t]);
+      var r = runTest(group.tests[t], group.type);
       groupResults.push(r);
       if (!r.pass) groupFailed++;
     }

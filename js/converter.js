@@ -13,9 +13,105 @@
 var DICTIONARY = window.DICTIONARY;
 
 /**
- * Basic English letter -> Phyrexian romanization for unknown words.
- * Based on the Clackeys Phyrexian keycap set and wiki transliteration data.
- * Maps lowercase English letters to their Phyrexian font equivalents.
+ * IPA -> Phyrexian font ASCII mapping.
+ * Complete mapping from IPA phonetic symbols to the ASCII characters
+ * that produce Phyrexian glyphs in the PhyrexianHorizontal font.
+ * Source: MTG Wiki Phyrexian (language) — Phonology tables.
+ *
+ * Sorted longest-first so multi-character IPA sequences match before singles.
+ */
+var IPA_TO_PHYREXIAN = [
+  // Multi-character IPA sequences (must match before singles)
+  // Sliced consonants (aspirated)
+  ['pʰ', 'f'],
+  ['tʰ', 'H'],
+  ['kʰ', '%'],
+  ['qʰ', '_'],
+  // Clanked consonants (ejective)
+  ['pʼ', 'P'],
+  ['tʼ', 'T'],
+  ['kxʼ', 'B'],
+  ['qʼ', 'I'],
+  // Sibilant affricates
+  ['tʃ', 'A'],    // "ch" as in "beach"
+  ['dʒ', 'a'],    // "j" as in "gene"
+  // Long vowels (doubled)
+  ['iː', 'EE'],
+  ['oʊ', 'oo'],
+  // Diphthongs / common combos
+  ['ŋ', 'N'],     // "ng" as in "sing"
+
+  // Single consonants — Nasals
+  ['m', 'm'],
+  ['n', 'n'],
+  ['ɴ', '$'],      // uvular nasal
+
+  // Single consonants — Plosives
+  ['p', 'p'],
+  ['b', 'b'],
+  ['t', 't'],
+  ['d', 'd'],
+  ['k', 'h'],      // [k] maps to font 'h'
+  ['g', 'k'],      // [g] maps to font 'k'
+  ['ɡ', 'k'],      // IPA ɡ variant
+  ['ɢ', 'G'],      // voiced uvular plosive
+  ['q', 'C'],       // voiceless uvular plosive
+  ['ʔ', 'D'],       // glottal stop
+
+  // Single consonants — Non-sibilant fricatives
+  ['f', 'i'],       // [f] maps to font 'i'
+  ['v', 'l'],       // [v] maps to font 'l'
+  ['θ', 'Z'],       // "th" as in "thin"
+  ['ð', 'K'],       // "th" as in "this"
+  ['ɣ', 'z'],       // voiced velar fricative
+  ['x', 's'],       // voiceless velar fricative
+  ['χ', 'S'],       // voiceless uvular fricative
+  ['ʁ', 'M'],       // voiced uvular fricative
+  ['h', 'Q'],       // glottal fricative
+
+  // Single consonants — Sibilant fricatives
+  ['s', 'L'],
+  ['z', '&'],
+  ['ʃ', 'g'],       // "sh" — metallic blade sound
+  ['ʒ', 'J'],       // "vision"
+
+  // Single consonants — Approximants
+  ['ʋ', 'v'],       // between [v] and [w]
+  ['j', 'w'],        // "y" as in "you"
+  ['ɰ', 'W'],       // velar approximant
+
+  // Single consonants — Trill
+  ['r', 'r'],        // rolled r
+
+  // Single consonants — Lateral
+  ['ɬ', 'V'],       // voiceless lateral fricative
+  ['ɮ', 'R'],       // voiced lateral fricative
+  ['l', 'c'],        // lateral approximant
+
+  // Vowels — Close
+  ['ɪ', 'E'],       // "kit"
+  ['i', 'EE'],      // "free" (long)
+  ['y', 'y'],        // rounded close front
+  ['u', 'Y'],        // "boot"
+  ['ʌ', 'Y'],       // "uh" (shares glyph with u)
+
+  // Vowels — Close-mid
+  ['e', 'u'],        // "hey" before the y
+  ['ø', 'O'],       // rounded, like "Sheoldred"
+  ['o', 'o'],        // RP "yawn"
+
+  // Vowels — Mid
+  ['ə', 'F'],       // "above" (schwa)
+
+  // Vowels — Open
+  ['a', 'e'],        // first part of "ow" in "cow"
+  ['ɒ', 'U'],       // American "thought"
+];
+
+/**
+ * English letter -> Phyrexian font ASCII mapping for unknown words.
+ * Used as a simple fallback when a word isn't in the dictionary
+ * and we don't have IPA for it.
  */
 var TRANSLITERATION = {
   'a': 'e',
@@ -45,6 +141,46 @@ var TRANSLITERATION = {
   'y': 'w',
   'z': '&',
 };
+
+/**
+ * Convert an IPA string to Phyrexian font ASCII.
+ * Matches longest IPA sequences first to avoid partial matches.
+ */
+function ipaToPhyrexian(ipa) {
+  var result = '';
+  var i = 0;
+
+  while (i < ipa.length) {
+    var remaining = ipa.slice(i);
+    var matched = false;
+
+    // Try each IPA mapping, longest first (already sorted)
+    for (var m = 0; m < IPA_TO_PHYREXIAN.length; m++) {
+      var key = IPA_TO_PHYREXIAN[m][0];
+      var val = IPA_TO_PHYREXIAN[m][1];
+      if (remaining.substring(0, key.length) === key) {
+        result += val;
+        i += key.length;
+        matched = true;
+        break;
+      }
+    }
+
+    if (!matched) {
+      // Skip stress marks, length marks, etc.
+      var ch = remaining.charAt(0);
+      if ('ˈˌːˑ̃'.indexOf(ch) !== -1) {
+        i++;
+      } else {
+        // Unknown character — pass through
+        result += ch;
+        i++;
+      }
+    }
+  }
+
+  return result;
+}
 
 /**
  * Transliterate a single unknown word letter-by-letter.
@@ -171,4 +307,6 @@ function textToPhyrexian(text) {
 window.textToPhyrexian = textToPhyrexian;
 window.wordToPhyrexian = wordToPhyrexian;
 window.transliterate = transliterate;
+window.ipaToPhyrexian = ipaToPhyrexian;
+window.IPA_TO_PHYREXIAN = IPA_TO_PHYREXIAN;
 })();
