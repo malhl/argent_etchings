@@ -272,24 +272,24 @@ var testGroups = [
       // "Phyrexian language" = fyrsRUDz (on Elesh Norn card)
       {
         input: "Phyrexian language",
-        expected: "fyrs RUDz",
+        expected: "|fyrs RUDz.",
         note: "Elesh Norn card — language selector"
       },
       // Card type lines are compound words in Phyrexian, but our converter
       // translates word-by-word with spaces — that's acceptable
       {
         input: "swamp",
-        expected: "Ceghm",
+        expected: "|Ceghm.",
         note: "Phyrexian Swamp card name"
       },
       {
         input: "Psychosis Crawler",
-        expected: "wE_kzvEDl bvudn",
+        expected: "|wE_kzvEDl bvudn.",
         note: "Psychosis Crawler WPN promo"
       },
       {
         input: "Blighted Agent",
-        expected: "R&FtzK kenvr",
+        expected: "|R&FtzK kenvr.",
         note: "Secret Lair: Phyrexian Faves"
       },
     ]
@@ -302,12 +302,12 @@ var testGroups = [
     tests: [
       {
         input: "perfection",
-        expected: "wne%m",
+        expected: "|wne%m.",
         note: "Common inscription on ONE card art"
       },
       {
         input: "compleat",
-        expected: "pcEnusL",
+        expected: "|pcEnusL.",
         note: "Arena animation — Phyrexian Scriptures"
       },
     ]
@@ -336,13 +336,36 @@ var testGroups = [
     tests: [
       {
         input: "death, perfection.",
-        expected: "ZYCs, wne%m.",
+        expected: "|ZYCs, wne%m.",
         note: "Commas and periods preserved"
       },
       {
         input: "fear! destroy!",
-        expected: "svEsA! CebD!",
+        expected: "|svEsA! CebD!.",
         note: "Exclamation marks preserved"
+      },
+    ]
+  },
+
+  {
+    name: "Converter: Line Markers",
+    source: "Phyrexian writing convention — | starts, . ends",
+    type: "phrase",
+    tests: [
+      {
+        input: "death",
+        expected: "|ZYCs.",
+        note: "Single word gets | prefix and . suffix"
+      },
+      {
+        input: "death\nperfection",
+        expected: "|ZYCs.\n|wne%m.",
+        note: "Each line gets its own | and ."
+      },
+      {
+        input: "death.",
+        expected: "|ZYCs.",
+        note: "Existing trailing period is not doubled"
       },
     ]
   },
@@ -356,7 +379,7 @@ var testGroups = [
       // z -> &, z -> &, z -> & = "&&&"
       {
         input: "zzz",
-        expected: "&&&",
+        expected: "|&&&.",
         note: "Unknown word falls back to transliteration"
       },
     ]

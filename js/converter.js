@@ -133,24 +133,39 @@ function pluralize(phyrWord) {
  *   plain: same string (readable as romanization)
  */
 function textToPhyrexian(text) {
-  // Tokenize: words vs non-words
-  var tokens = text.match(/[a-zA-Z']+|[^a-zA-Z']+/g) || [];
-  var phyrResult = '';
+  // Split into lines, process each independently
+  var lines = text.split('\n');
+  var outputLines = [];
 
-  for (var t = 0; t < tokens.length; t++) {
-    var token = tokens[t];
-    if (/^[a-zA-Z']+$/.test(token)) {
-      // Strip apostrophes for lookup, but handle contractions
-      var clean = token.replace(/'/g, '');
-      phyrResult += wordToPhyrexian(clean);
-    } else {
-      // Punctuation / whitespace — pass through
-      // Map period to Phyrexian sentence-end marker
-      phyrResult += token;
+  for (var l = 0; l < lines.length; l++) {
+    var line = lines[l];
+    if (!line.trim()) {
+      outputLines.push('');
+      continue;
     }
+
+    // Tokenize: words vs non-words
+    var tokens = line.match(/[a-zA-Z']+|[^a-zA-Z']+/g) || [];
+    var phyrResult = '';
+
+    for (var t = 0; t < tokens.length; t++) {
+      var token = tokens[t];
+      if (/^[a-zA-Z']+$/.test(token)) {
+        var clean = token.replace(/'/g, '');
+        phyrResult += wordToPhyrexian(clean);
+      } else {
+        phyrResult += token;
+      }
+    }
+
+    // Strip any trailing period — we add our own closing hook
+    var trimmed = phyrResult.replace(/\.\s*$/, '');
+
+    // Phyrexian convention: | starts a line, . ends it
+    outputLines.push('|' + trimmed + '.');
   }
 
-  return { phyrexian: phyrResult };
+  return { phyrexian: outputLines.join('\n') };
 }
 
 window.textToPhyrexian = textToPhyrexian;
