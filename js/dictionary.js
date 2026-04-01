@@ -591,6 +591,34 @@ var DICTIONARY = {
   "shatter": "ApenDk",
   "crush": "Locm",
   "grind": "Locm",
+
+  // ===== Common words with manual IPA -> Phyrexian =====
+  // (Free Dictionary API returned no IPA for these)
+  "though": "Ko",        // /ðoʊ/
+  "through": "ZrY",      // /θɹuː/
+  "enough": "EnYi",      // /ɪnʌf/
+  "thought": "ZUt",      // /θɔːt/
+  "whether": "vuKFr",    // /wɛðɚ/
+  "neither": "nEKFr",    // /niːðɚ/
+  "always": "Ucvu&",     // /ɔːlweɪz/
+  "never": "nulFr",      // /nɛvɚ/
+  "sometimes": "LYmteFm&", // /sʌmtaɪmz/
+  "nothing": "nYZEN",    // /nʌθɪŋ/
+  "something": "LYmZEN", // /sʌmθɪŋ/
+  "anything": "unEZEN",  // /ɛnɪθɪŋ/
+  "everything": "ulrEZEN", // /ɛvɹɪθɪŋ/
+  "another": "FnYKFr",   // /ənʌðɚ/
+  "between": "bEtvEEn",  // /bɪtwiːn/
+  "during": "dYrEN",     // /dʊɹɪŋ/
+  "behind": "bEQeFnd",   // /bɪhaɪnd/
+  "beyond": "bEwUnd",    // /bɪjɒnd/
+  "toward": "tFvUrd",    // /təwɔːɹd/
+  "towards": "tFvUrd&",  // /təwɔːɹdz/
+  "upon": "FpUn",        // /əpɒn/
+  "across": "FhrUL",     // /əkɹɒs/
+  "except": "EhLupt",    // /ɪksɛpt/
+  "since": "LEnL",       // /sɪns/
+  "although": "UcKo",    // /ɔːlðoʊ/
 };
 
 window.DICTIONARY = DICTIONARY;
