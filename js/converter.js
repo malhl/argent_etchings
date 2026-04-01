@@ -12,6 +12,9 @@
 
 var DICTIONARY = window.DICTIONARY;
 
+// Cache for API IPA lookups (word → IPA string, or null if not found)
+var apiCache = {};
+
 /**
  * IPA -> Phyrexian font ASCII mapping.
  * Complete mapping from IPA phonetic symbols to the ASCII characters
@@ -196,32 +199,103 @@ function transliterate(word) {
 }
 
 /**
+ * Look up a word's IPA pronunciation via the Free Dictionary API.
+ * Returns IPA string or null. Results are cached.
+ */
+async function lookupIPA(word) {
+  var lower = word.toLowerCase();
+
+  if (apiCache[lower] !== undefined) {
+    return apiCache[lower];
+  }
+
+  try {
+    var resp = await fetch(
+      'https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(lower)
+    );
+
+    if (!resp.ok) {
+      apiCache[lower] = null;
+      return null;
+    }
+
+    var data = await resp.json();
+
+    if (!Array.isArray(data) || !data.length) {
+      apiCache[lower] = null;
+      return null;
+    }
+
+    for (var e = 0; e < data.length; e++) {
+      var entry = data[e];
+      if (entry.phonetic) {
+        var ipa = cleanIPA(entry.phonetic);
+        if (ipa) { apiCache[lower] = ipa; return ipa; }
+      }
+      if (entry.phonetics) {
+        for (var p = 0; p < entry.phonetics.length; p++) {
+          if (entry.phonetics[p].text) {
+            var ipa2 = cleanIPA(entry.phonetics[p].text);
+            if (ipa2) { apiCache[lower] = ipa2; return ipa2; }
+          }
+        }
+      }
+    }
+
+    apiCache[lower] = null;
+    return null;
+  } catch (err) {
+    console.warn('Dictionary API error:', err);
+    apiCache[lower] = null;
+    return null;
+  }
+}
+
+/**
+ * Strip slashes/brackets and whitespace from an IPA string.
+ */
+function cleanIPA(raw) {
+  if (!raw) return null;
+  var cleaned = raw.replace(/^[\/\[]\s*/, '').replace(/\s*[\/\]]$/, '').trim();
+  return cleaned || null;
+}
+
+/**
  * Convert a single English word to Phyrexian romanization.
- * Tries dictionary first, then falls back to transliteration.
+ * Pipeline: dictionary -> API cache (IPA) -> morphology -> transliteration.
  */
 function wordToPhyrexian(word) {
   var lower = word.toLowerCase();
 
-  // Exact dictionary match
+  // 1. Exact dictionary match
   if (DICTIONARY[lower]) {
     return DICTIONARY[lower];
   }
 
-  // Try without trailing 's' for simple plurals
+  // 2. API cache — if we've fetched IPA for this word, convert it
+  if (apiCache[lower]) {
+    return ipaToPhyrexian(apiCache[lower]);
+  }
+
+  // 3. Try without trailing 's' for simple plurals
   if (lower.endsWith('s') && lower.length > 2) {
     var singular = lower.slice(0, -1);
     if (DICTIONARY[singular]) {
-      // Phyrexian plurals double the first vowel
-      var phyr = DICTIONARY[singular];
-      return pluralize(phyr);
+      return pluralize(DICTIONARY[singular]);
+    }
+    if (apiCache[singular]) {
+      return pluralize(ipaToPhyrexian(apiCache[singular]));
     }
   }
 
-  // Try without 'ed' for simple past tense
+  // 4. Try without 'ed' for simple past tense
   if (lower.endsWith('ed') && lower.length > 3) {
     var stem = lower.slice(0, -2);
     if (DICTIONARY[stem]) {
       return 'DY' + DICTIONARY[stem];
+    }
+    if (apiCache[stem]) {
+      return 'DY' + ipaToPhyrexian(apiCache[stem]);
     }
     // doubled consonant: "stopped" -> "stop"
     if (stem.length > 1 && stem[stem.length - 1] === stem[stem.length - 2]) {
@@ -229,23 +303,64 @@ function wordToPhyrexian(word) {
       if (DICTIONARY[stem2]) {
         return 'DY' + DICTIONARY[stem2];
       }
+      if (apiCache[stem2]) {
+        return 'DY' + ipaToPhyrexian(apiCache[stem2]);
+      }
     }
   }
 
-  // Try without 'ing' for present participle
+  // 5. Try without 'ing' for present participle
   if (lower.endsWith('ing') && lower.length > 4) {
     var stem3 = lower.slice(0, -3);
     if (DICTIONARY[stem3]) {
       return 'su' + DICTIONARY[stem3];
     }
-    // "making" -> "make" (remove 'ing', add 'e')
+    if (apiCache[stem3]) {
+      return 'su' + ipaToPhyrexian(apiCache[stem3]);
+    }
     if (DICTIONARY[stem3 + 'e']) {
       return 'su' + DICTIONARY[stem3 + 'e'];
     }
+    if (apiCache[stem3 + 'e']) {
+      return 'su' + ipaToPhyrexian(apiCache[stem3 + 'e']);
+    }
   }
 
-  // Fallback: transliterate
+  // 6. Fallback: transliterate letter-by-letter
   return transliterate(lower);
+}
+
+/**
+ * Trigger async API lookups for unknown words in the text.
+ * Results get cached for the next synchronous conversion pass.
+ */
+async function prefetchUnknowns(text) {
+  var words = text.match(/[a-zA-Z]+/g) || [];
+  var toFetch = [];
+  for (var i = 0; i < words.length; i++) {
+    var w = words[i].toLowerCase();
+    if (!DICTIONARY[w] && apiCache[w] === undefined) {
+      toFetch.push(w);
+    }
+  }
+
+  // Deduplicate
+  var unique = [];
+  var seen = {};
+  for (var j = 0; j < toFetch.length; j++) {
+    if (!seen[toFetch[j]]) {
+      seen[toFetch[j]] = true;
+      unique.push(toFetch[j]);
+    }
+  }
+
+  if (!unique.length) return;
+
+  // Fetch in parallel, max 5 at a time to be polite to the free API
+  for (var k = 0; k < unique.length; k += 5) {
+    var batch = unique.slice(k, k + 5);
+    await Promise.all(batch.map(function(w) { return lookupIPA(w); }));
+  }
 }
 
 /**
@@ -308,5 +423,7 @@ window.textToPhyrexian = textToPhyrexian;
 window.wordToPhyrexian = wordToPhyrexian;
 window.transliterate = transliterate;
 window.ipaToPhyrexian = ipaToPhyrexian;
+window.prefetchUnknowns = prefetchUnknowns;
+window.apiCache = apiCache;
 window.IPA_TO_PHYREXIAN = IPA_TO_PHYREXIAN;
 })();

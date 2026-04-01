@@ -4,10 +4,18 @@
  */
 
 var textToPhyrexian = window.textToPhyrexian;
+var prefetchUnknowns = window.prefetchUnknowns;
+var DICTIONARY = window.DICTIONARY;
+var apiCache = window.apiCache;
 
 var inputEl = document.getElementById('input-text');
 var phyrexianEl = document.getElementById('phyrexian-output');
 var romanEl = document.getElementById('roman-output');
+
+// Track current word length for the 4-char fetch trigger
+var currentWordLen = 0;
+// Avoid duplicate fetches
+var fetchedWords = {};
 
 function convert() {
   var text = inputEl.value;
@@ -23,9 +31,64 @@ function convert() {
   if (romanEl) romanEl.textContent = result.phyrexian;
 }
 
+/**
+ * Fetch IPA for unknown words, then re-convert with cached results.
+ */
+async function fetchNewUnknowns(text) {
+  var words = text.match(/[a-zA-Z]+/g) || [];
+  var toFetch = [];
+  for (var i = 0; i < words.length; i++) {
+    var w = words[i].toLowerCase();
+    if (!DICTIONARY[w] && apiCache[w] === undefined && !fetchedWords[w]) {
+      toFetch.push(w);
+    }
+  }
+
+  // Deduplicate
+  var unique = [];
+  var seen = {};
+  for (var j = 0; j < toFetch.length; j++) {
+    if (!seen[toFetch[j]]) {
+      seen[toFetch[j]] = true;
+      unique.push(toFetch[j]);
+    }
+  }
+
+  if (!unique.length) return;
+
+  for (var k = 0; k < unique.length; k++) {
+    fetchedWords[unique[k]] = true;
+  }
+
+  await prefetchUnknowns(text);
+  convert();
+}
+
 // Live conversion on every keystroke
 inputEl.addEventListener('input', function () {
   convert();
+
+  var text = inputEl.value;
+  var lastChar = text.slice(-1);
+
+  // On space/punctuation: word just finished — fetch unknowns
+  if (/[\s.,!?;:]/.test(lastChar)) {
+    currentWordLen = 0;
+    fetchNewUnknowns(text);
+    return;
+  }
+
+  // Track letters in current word
+  if (/[a-zA-Z]/.test(lastChar)) {
+    currentWordLen++;
+  } else {
+    currentWordLen = 0;
+  }
+
+  // After 4+ characters, fetch on every keystroke
+  if (currentWordLen >= 4) {
+    fetchNewUnknowns(text);
+  }
 });
 
 // --- Resize handle: drag upward to grow the input area ---
