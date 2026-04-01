@@ -1,0 +1,377 @@
+/* =========================================
+   Phyrexian Biomechanical Theme
+   "Ash is our air, darkness our flesh."
+   ========================================= */
+
+@font-face {
+  font-family: 'PhyrexianHorizontal';
+  src: url('../fonts/PhyrexianHorizontal.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+:root {
+  /* Phyrexian palette */
+  --void:           #0a0a0a;
+  --oil:            #111111;
+  --oil-sheen:      #1a1a1e;
+  --ichor:          #0d1210;
+  --bone:           #c8bfa9;
+  --bone-bright:    #e2d9c5;
+  --porcelain:      #f0ebe0;
+  --sinew:          #8a7e6b;
+  --rust:           #6b3a2a;
+  --furnace:        #c44520;
+  --furnace-glow:   #e8622e;
+  --corrode:        #3a4a3a;
+  --chrome:         #6b7d8a;
+  --ichor-green:    #2a3a28;
+  --glistening:     #1a2e1e;
+  --ink:            #d4cbb8;
+  --ink-dim:        #8a8070;
+  --border:         #2a2520;
+  --border-light:   #3a3530;
+  --shadow:         rgba(0, 0, 0, 0.6);
+  --oil-drip:       rgba(15, 20, 15, 0.8);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Crimson Text', 'Georgia', serif;
+  background-color: var(--void);
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  background-image:
+    radial-gradient(ellipse at 30% 20%, rgba(42, 58, 40, 0.15) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 80%, rgba(107, 58, 42, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(26, 26, 30, 0.5) 0%, transparent 80%);
+}
+
+/* Header */
+header {
+  text-align: center;
+  padding: 0.5rem 1rem 0.35rem;
+  border-bottom: 1px solid var(--border-light);
+  background: linear-gradient(180deg, var(--oil-sheen) 0%, var(--void) 100%);
+  flex-shrink: 0;
+  position: relative;
+}
+
+header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    var(--furnace) 30%,
+    var(--furnace-glow) 50%,
+    var(--furnace) 70%,
+    transparent
+  );
+  opacity: 0.4;
+}
+
+header h1 {
+  font-family: 'Cinzel', 'Georgia', serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--bone-bright);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 0.1rem;
+  text-shadow:
+    0 0 20px rgba(196, 69, 32, 0.15),
+    0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+header .subtitle {
+  font-size: 0.7rem;
+  color: var(--sinew);
+  font-style: italic;
+  letter-spacing: 0.06em;
+}
+
+header .subtitle .phyrexian-inline {
+  font-family: 'PhyrexianHorizontal', serif;
+  font-style: normal;
+  font-size: 0.85rem;
+  color: var(--bone);
+  letter-spacing: 0.02em;
+}
+
+/* Decorative rule — Phyrexian phi symbol */
+.ornament {
+  text-align: center;
+  color: var(--sinew);
+  font-size: 0.9rem;
+  letter-spacing: 0.6em;
+  padding: 0.15rem 0;
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+
+/* Main output area */
+.output-area {
+  flex: 1;
+  overflow: hidden;
+  padding: 0.75rem 2rem;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.output-section {
+  background: var(--oil);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 1rem 1.25rem;
+  box-shadow:
+    inset 0 1px 4px var(--shadow),
+    inset 0 0 20px rgba(0, 0, 0, 0.3);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.output-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    var(--border-light) 20%,
+    var(--sinew) 50%,
+    var(--border-light) 80%,
+    transparent
+  );
+  opacity: 0.3;
+}
+
+.output-section h2 {
+  font-family: 'Cinzel', 'Georgia', serif;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--sinew);
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.25rem;
+  flex-shrink: 0;
+}
+
+#phyrexian-output {
+  font-family: 'PhyrexianHorizontal', monospace;
+  font-size: 2rem;
+  line-height: 1.4;
+  color: var(--bone-bright);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-shadow: 0 0 8px rgba(196, 69, 32, 0.06);
+
+  /* Vertical top-to-bottom, columns flow right-to-left */
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  direction: ltr;
+}
+
+#roman-output {
+  font-family: 'Crimson Text', 'Georgia', serif;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ink-dim);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  flex: 1;
+  overflow-y: auto;
+  letter-spacing: 0.02em;
+}
+
+.output-section.romanization {
+  flex: 0 0 auto;
+  max-height: 25%;
+}
+
+/* Input area — pinned to bottom */
+.input-area {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border-light);
+  background: linear-gradient(0deg, var(--oil-sheen) 0%, var(--void) 100%);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.input-area::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 5%;
+  right: 5%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    var(--furnace) 30%,
+    var(--furnace-glow) 50%,
+    var(--furnace) 70%,
+    transparent
+  );
+  opacity: 0.25;
+}
+
+/* Drag handle */
+.resize-handle {
+  height: 12px;
+  cursor: ns-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.resize-handle::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 2px;
+  background: var(--border-light);
+  border-radius: 1px;
+}
+
+.resize-handle:hover::after,
+.resize-handle:active::after {
+  background: var(--sinew);
+  box-shadow: 0 0 6px rgba(196, 69, 32, 0.2);
+}
+
+.input-wrap {
+  padding: 0 2rem 1.25rem;
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+#input-text {
+  width: 100%;
+  height: 100%;
+  padding: 0.75rem 1rem;
+  font-family: 'Crimson Text', 'Georgia', serif;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--oil);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  resize: none;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: inset 0 1px 4px var(--shadow);
+}
+
+#input-text:focus {
+  border-color: var(--rust);
+  box-shadow:
+    inset 0 1px 4px var(--shadow),
+    0 0 0 1px rgba(107, 58, 42, 0.3),
+    0 0 12px rgba(196, 69, 32, 0.06);
+}
+
+#input-text::placeholder {
+  color: var(--ink-dim);
+  font-style: italic;
+  opacity: 0.5;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 0.4rem 1rem;
+  font-size: 0.5rem;
+  color: var(--ink-dim);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  opacity: 0.6;
+  letter-spacing: 0.05em;
+}
+
+footer a {
+  color: var(--sinew);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+footer a:hover {
+  color: var(--furnace);
+  text-decoration: none;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--void);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-light);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sinew);
+}
+
+/* Selection */
+::selection {
+  background: rgba(196, 69, 32, 0.3);
+  color: var(--porcelain);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  header h1 {
+    font-size: 1.3rem;
+    letter-spacing: 0.1em;
+  }
+
+  .output-area {
+    padding: 0.75rem 1rem;
+  }
+
+  .input-wrap {
+    padding: 0 1rem 1rem;
+  }
+
+  #phyrexian-output {
+    font-size: 1.5rem;
+  }
+}

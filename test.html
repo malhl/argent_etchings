@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Argent Etchings — Test Suite</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Consolas', 'Courier New', monospace;
+      background: #0a0a0a;
+      color: #c8bfa9;
+      padding: 1.5rem;
+      line-height: 1.5;
+    }
+    h1 { font-size: 1.3rem; color: #e2d9c5; margin-bottom: 0.5rem; letter-spacing: 0.1em; }
+    .summary {
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      border-radius: 3px;
+      font-size: 0.9rem;
+    }
+    .summary.pass { background: #1a2e1e; border: 1px solid #2a4a2a; color: #6a9a6a; }
+    .summary.fail { background: #2e1a1a; border: 1px solid #4a2a2a; color: #c44520; }
+    .section { margin-bottom: 1.5rem; }
+    .section h2 {
+      font-size: 0.85rem;
+      color: #8a7e6b;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      border-bottom: 1px solid #2a2520;
+      padding-bottom: 0.25rem;
+      margin-bottom: 0.5rem;
+    }
+    .test { padding: 0.25rem 0; font-size: 0.8rem; display: flex; gap: 0.75rem; }
+    .test .status { flex-shrink: 0; width: 3rem; text-align: center; }
+    .test .detail { flex: 1; }
+    .test.pass .status { color: #4a8a4a; }
+    .test.fail .status { color: #c44520; }
+    .test.fail .expected { color: #6a9a6a; opacity: 0.7; }
+    .test.fail .got { color: #c44520; opacity: 0.7; }
+    .test.fail .detail { color: #e8622e; }
+  </style>
+</head>
+<body>
+  <h1>Argent Etchings — Test Suite</h1>
+  <div id="summary" class="summary"></div>
+  <div id="results"></div>
+
+  <!-- Load the app scripts -->
+  <script src="js/dictionary.js"></script>
+  <script src="js/converter.js"></script>
+
+  <!-- Test runner -->
+  <script src="js/tests.js"></script>
+</body>
+</html>
